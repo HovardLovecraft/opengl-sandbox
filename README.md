@@ -1,2 +1,21 @@
 # opengl-sandbox
-This repo is dedicated to learn and experiment with opengl
+
+Learning OpenGL — experiments and exercises following learnopengl.com.
+
+## Setup
+
+Dependencies: GLFW, GLEW (via Homebrew)
+
+\```bash
+brew install glfw glew
+mkdir build && cd build
+cmake ..
+make
+\```
+
+## Progress
+
+- [x] Hello Triangle
+- [ ] Textures
+- [ ] Transformations
+- [ ] Camera
