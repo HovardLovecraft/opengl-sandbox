@@ -8,4 +8,5 @@ xcuserdata/
 .DS_Store
 
 # Project-specific
+CLAUDE.md
 output/*.ppm

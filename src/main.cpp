@@ -9,13 +9,19 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+void processInput(GLFWwindow *window);
+
 // Вершинний шейдер — запускається для кожної вершини
 const char* vertexShaderSource = R"(
     #version 330 core
-    layout (location = 0) in vec3 aPos;
+    layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0
+    layout (location = 1) in vec3 aColor; // the color variable has attribute position 1
+
+    out vec3 ourColor; // output a color to the fragment shader
 
     void main() {
         gl_Position = vec4(aPos, 1.0);
+        ourColor = aColor; // set ourColor to the input color we got from the vertex data
     }
 )";
 
@@ -23,9 +29,10 @@ const char* vertexShaderSource = R"(
 const char* fragmentShaderSource = R"(
     #version 330 core
     out vec4 FragColor;
+    in vec3 ourColor;
 
     void main() {
-        FragColor = vec4(1.0, 0.5, 0.2, 1.0); // помаранчевий
+        FragColor = vec4(ourColor, 1.0f);
     }
 )";
 
@@ -45,11 +52,6 @@ unsigned int compileShader(unsigned int type, const char* source) {
 
     return shader;
 }
-
-#include <stdio.h>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
 
 int main() {
     // --- Ініціалізація (те саме що було) ---
@@ -79,9 +81,10 @@ int main() {
 
     // --- Геометрія ---
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,  // нижній лівий
-         0.5f, -0.5f, 0.0f,  // нижній правий
-         0.0f,  0.5f, 0.0f   // верхній центр
+        // positions         // colors
+        0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+        0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
     };
 
     unsigned int VAO, VBO;
@@ -93,19 +96,22 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Описуємо VAO: атрибут 0, 3 floats, крок 3*float, зміщення 0
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // position VAO attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    //color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);                    // закінчили "записувати"
 
     // --- Render loop ---
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        processInput(window);
 
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
@@ -122,4 +128,9 @@ int main() {
     glfwTerminate();
 
     return 0;
+}
+
+void processInput(GLFWwindow *window) {
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }
