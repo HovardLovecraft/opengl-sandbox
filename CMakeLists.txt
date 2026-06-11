@@ -3,6 +3,7 @@ project(opengl-sandbox)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # GLFW
 set(GLFW_DIR /opt/homebrew/opt/glfw)
@@ -14,6 +15,11 @@ add_executable(sandbox src/main.cpp)
 target_include_directories(sandbox PRIVATE
     ${GLFW_DIR}/include
     ${GLEW_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+target_compile_definitions(sandbox PRIVATE
+    SHADER_DIR="${CMAKE_SOURCE_DIR}/shaders"
 )
 
 target_link_libraries(sandbox PRIVATE
