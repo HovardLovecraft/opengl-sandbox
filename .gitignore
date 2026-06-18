@@ -12,4 +12,5 @@ xcuserdata/
 
 # Project-specific
 CLAUDE.md
+AGENTS.md
 output/*.ppm
