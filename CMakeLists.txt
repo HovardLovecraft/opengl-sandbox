@@ -9,12 +9,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(GLFW_DIR /opt/homebrew/opt/glfw)
 # GLEW
 set(GLEW_DIR /opt/homebrew/opt/glew)
+#GLM
+set(GLM_DIR /opt/homebrew/opt/glm)
 
 add_executable(sandbox src/main.cpp)
 
 target_include_directories(sandbox PRIVATE
     ${GLFW_DIR}/include
     ${GLEW_DIR}/include
+    ${GLM_DIR}/include
     ${CMAKE_SOURCE_DIR}/src
 )
 

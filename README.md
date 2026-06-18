@@ -16,6 +16,6 @@ make
 ## Progress
 
 - [x] Hello Triangle
-- [ ] Textures
-- [ ] Transformations
+- [x] Textures
+- [x] Transformations
 - [ ] Camera
