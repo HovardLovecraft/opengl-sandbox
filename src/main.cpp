@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "Camera.h"
+#include "OpenGLDebug.h"
 #include "Shader.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -47,10 +48,23 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
+    #ifndef NDEBUG
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    #endif
+
     GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Sandbox", nullptr, nullptr);
     glfwMakeContextCurrent(window);
     glewExperimental = GL_TRUE;
-    glewInit();
+    GLenum glewError = glewInit();
+    if (glewError != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW: " << glewGetErrorString(glewError) << "\n";
+        return -1;
+    }
+
+    #ifndef NDEBUG
+    glGetError(); // GLEW may leave a benign GL_INVALID_ENUM in core profile.
+    setupOpenGLDebugCallback();
+    #endif
 
     glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
     glm::mat4 trans = glm::mat4(1.0f);
