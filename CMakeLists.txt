@@ -12,7 +12,10 @@ set(GLEW_DIR /opt/homebrew/opt/glew)
 #GLM
 set(GLM_DIR /opt/homebrew/opt/glm)
 
-add_executable(sandbox src/main.cpp)
+add_executable(sandbox
+    src/main.cpp
+    src/OpenGLDebug.cpp
+)
 
 target_include_directories(sandbox PRIVATE
     ${GLFW_DIR}/include
