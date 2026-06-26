@@ -1,6 +1,9 @@
 # Vs Code
 .vscode/
 
+# CLion
+.idea
+
 # Xcode
 DerivedData/
 build/

@@ -37,6 +37,12 @@ float lastY =  600.0f / 2.0;
 float deltaTime = 0.0f;	
 float lastFrame = 0.0f;
 
+//Lighting
+//glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(0.0f, 0.0f, 1.0f);
+glm::vec3 lampColor(1.0f, 0.0f, 0.0f);
+glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+
 
 
 
@@ -79,7 +85,8 @@ int main() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // --- Шейдерна програма ---
-    Shader ourShader(SHADER_DIR "/shader.vs", SHADER_DIR "/shader.fs");
+    Shader objShader(SHADER_DIR "/shader.vs", SHADER_DIR "/shader.fs");
+    Shader lampShader(SHADER_DIR "/shader.vs", SHADER_DIR "/lamp.fs");
     // --- Геометрія ---
     unsigned int indices[] = {
         0, 1, 2,  // First Triangle
@@ -145,12 +152,12 @@ int main() {
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-    unsigned int EBO, VAO, VBO;
-    glGenVertexArrays(1, &VAO);
+    unsigned int EBO, cubeVAO, VBO;
+    glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    glBindVertexArray(VAO);                  // починаємо "записувати" в VAO
+    glBindVertexArray(cubeVAO);                  // починаємо "записувати" в VAO
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -164,6 +171,16 @@ int main() {
 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    //light VAO
+    unsigned int lightVAO;
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+    // we only need to bind to the VBO, the container's VBO's data already contains the data.
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // set the vertex attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
 
     // load and create a texture 1
@@ -263,9 +280,6 @@ int main() {
         glGenerateMipmap(GL_TEXTURE_2D);
     
     float mixFactor = 0.5f;
-    ourShader.use();
-    ourShader.setInt("texture1", 0);
-    ourShader.setInt("texture2", 1);
 
     // --- Render loop ---
     while (!glfwWindowShouldClose(window)) {
@@ -288,7 +302,6 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
-        ourShader.setFloat("mixFactor", mixFactor);
 
 
         //Perspective
@@ -299,13 +312,19 @@ int main() {
         // note that we're translating the scene in the reverse direction of where we want to move
         view = camera.GetViewMatrix();
 
-        int viewLoc = glGetUniformLocation(ourShader.ID, "view");
+        objShader.use();
+        objShader.setInt("texture1", 0);
+        objShader.setInt("texture2", 1);
+        objShader.setVec3("lightColor", lightColor);
+        objShader.setFloat("mixFactor", mixFactor);
+
+        int viewLoc = glGetUniformLocation(objShader.ID, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        int projLoc = glGetUniformLocation(ourShader.ID, "projection");
+        int projLoc = glGetUniformLocation(objShader.ID, "projection");
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
 
         // Cube loop
-        glBindVertexArray(VAO);
+        glBindVertexArray(cubeVAO);
         for(size_t i = 0; i < 10; i++)
         {   
             glm::mat4 model = glm::mat4(1.0f);
@@ -313,10 +332,27 @@ int main() {
             float angle; 
             i % 3 == 0 ? angle = 20.0f * i : angle = (float)glfwGetTime() * 15.0f;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            ourShader.setMat4("model", model);
+            objShader.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        lampShader.use();
+        lampShader.setVec3("lightColor", lampColor);
+
+        int lampViewLoc = glGetUniformLocation(lampShader.ID, "view");
+        glUniformMatrix4fv(lampViewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        int lampProjLoc = glGetUniformLocation(lampShader.ID, "projection");
+        glUniformMatrix4fv(lampProjLoc, 1, GL_FALSE, glm::value_ptr(proj));
+
+        glBindVertexArray(lightVAO);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f));
+
+        lampShader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -325,7 +361,7 @@ int main() {
     }
 
     // --- Cleanup ---
-    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &cubeVAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteTextures(1, &texture1);

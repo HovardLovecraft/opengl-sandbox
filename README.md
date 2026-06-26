@@ -18,4 +18,10 @@ make
 - [x] Hello Triangle
 - [x] Textures
 - [x] Transformations
-- [ ] Camera
+- [x] Camera
+- [x] Colors
+- [ ] Basic Lighting
+- [ ] Materials
+- [ ] Lighting maps
+- [ ] Light casters
+- [ ] Multiple lights
