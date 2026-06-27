@@ -20,7 +20,7 @@ make
 - [x] Transformations
 - [x] Camera
 - [x] Colors
-- [ ] Basic Lighting
+- [x] Basic Lighting
 - [ ] Materials
 - [ ] Lighting maps
 - [ ] Light casters
