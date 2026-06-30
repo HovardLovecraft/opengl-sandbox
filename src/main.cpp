@@ -295,7 +295,7 @@ int main() {
 
         // render
         // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // bind textures on corresponding texture units
@@ -317,13 +317,27 @@ int main() {
         lightPos.y = sin(currentFrame / 2.0f) * 1.0f;
         lightPos.z = cos(currentFrame) * 2.0f;
 
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
+        lampColor = lightColor;
+        glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f);
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+
         objShader.use();
         objShader.setInt("texture1", 0);
         objShader.setInt("texture2", 1);
         objShader.setVec3("lightColor", lightColor);
         objShader.setFloat("mixFactor", mixFactor);
-        objShader.setVec3("lightPos", lightPos);
         objShader.setVec3("viewPos", camera.Position);
+        objShader.setVec3("light.position", lightPos);
+        objShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+        objShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+        objShader.setVec3("material.specular", glm::vec3(0.0f));
+        objShader.setFloat("material.shininess", 8.0f);
+        objShader.setVec3("light.ambient",  ambientColor);
+        objShader.setVec3("light.diffuse",  diffuseColor); // darken diffuse light a bit
+        objShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
         int viewLoc = glGetUniformLocation(objShader.ID, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
