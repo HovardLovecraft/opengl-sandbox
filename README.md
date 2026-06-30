@@ -21,7 +21,7 @@ make
 - [x] Camera
 - [x] Colors
 - [x] Basic Lighting
-- [ ] Materials
+- [x] Materials
 - [ ] Lighting maps
 - [ ] Light casters
 - [ ] Multiple lights
